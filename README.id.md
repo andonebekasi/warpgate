@@ -14,12 +14,14 @@ Folder ini telah dibersihkan (*data cleansing*) dari seluruh database lama, log 
 
 ```text
 warpgate/
-├── docker-compose.yml       # Konfigurasi container Warpgate
-├── setup.sh                 # Skrip inisialisasi otomatis & manajemen reset data
-├── install-docker.sh        # Skrip instalasi Docker multi-OS (Amazon Linux, Ubuntu, Debian, RHEL, AlmaLinux, Oracle Linux)
+├── deploy-warpgate.sh       # Skrip All-in-One: cek & instal Docker otomatis + deploy Warpgate
+├── setup.sh                 # Skrip inisialisasi Warpgate & manajemen reset data
+├── install-docker.sh        # Skrip instalasi Docker multi-OS (standalone)
 ├── install-docker-al2023.sh # Skrip instalasi Docker khusus Amazon Linux 2023
+├── docker-compose.yml       # Konfigurasi container Warpgate
 ├── README.md                # Dokumentasi utama (English)
 ├── README.id.md             # Panduan penggunaan (Bahasa Indonesia)
+├── PANDUAN_ADMIN_WARPGATE.md# Panduan lengkap Admin UI & Konfigurasi Target
 └── data/
     └── warpgate.yaml        # Konfigurasi dasar Warpgate (external_host: null)
 ```
@@ -35,7 +37,7 @@ warpgate/
 
 ---
 
-## 🚀 Panduan Penggunaan di Host Linux Baru
+## 🚀 Panduan Deployment di Host Linux Baru
 
 ### 1. Salin Folder ke Host Baru
 Dari komputer lokal atau server lama, salin folder `warpgate` ke server Linux tujuan (misalnya menggunakan `scp` atau `rsync`):
@@ -48,8 +50,43 @@ scp -r /path/to/warpgate user@ip-host-baru:/opt/warpgate
 rsync -avzP /path/to/warpgate/ user@ip-host-baru:/opt/warpgate/
 ```
 
-### 2. Instalasi Docker & Docker Compose (Jika Belum Terpasang)
-Jika host baru belum memiliki Docker dan Docker Compose, jalankan skrip instalasi otomatis:
+---
+
+### ⚡ Metode 1: All-in-One Deployment (`deploy-warpgate.sh`) — *Sangat Direkomendasikan*
+
+Skrip `deploy-warpgate.sh` adalah skrip otomatisasi satu langkah yang menggabungkan seluruh proses persiapan server hingga Warpgate siap digunakan.
+
+**Fungsi Skrip `deploy-warpgate.sh`:**
+1. **Pemeriksaan Docker**: Mendeteksi apakah Docker Engine dan Docker Compose sudah terpasang dan berjalan di sistem.
+2. **Otomatis Install Docker**: Jika Docker belum ada, skrip akan langsung mengidentifikasi OS Anda dan menginstalnya secara otomatis (mendukung Amazon Linux 2/2023, Ubuntu, Debian, RHEL, CentOS, Rocky Linux, AlmaLinux, Oracle Linux) beserta konfigurasi user permission non-root (bisa akses Docker tanpa `sudo`).
+3. **Inisialisasi & Jalankan Warpgate**: Setelah Docker siap, skrip langsung menjalankan inisialisasi database SQLite, sertifikat TLS, SSH keys, konfigurasi reverse proxy, dan menyalakan container Warpgate (`docker compose up -d`).
+
+#### Cara Menjalankan:
+```bash
+cd /opt/warpgate
+chmod +x deploy-warpgate.sh
+
+# Mode interaktif (akan meminta input password admin baru):
+./deploy-warpgate.sh
+
+# Atau mode non-interaktif (langsung menyertakan password dan domain/host):
+./deploy-warpgate.sh --password "PasswordAdminBaru123!" --host "bastion.domain-anda.com"
+```
+
+**Pilihan Opsi / Parameter:**
+- `--password <PASS>` : Tentukan password awal akun `admin` Warpgate.
+- `--host <HOSTNAME>` : Tentukan domain atau Public IP untuk `external_host` Warpgate.
+- `--skip-run` : Hanya jalankan pengecekan OS dan instalasi Docker tanpa langsung menyalakan Warpgate.
+- `-h, --help` : Tampilkan panduan penggunaan parameter.
+
+---
+
+### 🛠️ Metode 2: Deployment Bertahap (Manual / Step-by-Step)
+
+Jika Anda ingin menjalankan proses instalasi Docker dan setup Warpgate secara terpisah:
+
+#### Langkah A: Instalasi Docker & Docker Compose
+Jika host baru belum memiliki Docker, pasang menggunakan `install-docker.sh`:
 
 ```bash
 cd /opt/warpgate
@@ -65,34 +102,26 @@ chmod +x install-docker.sh
 > - **AlmaLinux** & **Rocky Linux** (8, 9)
 > - **Oracle Linux** (OL 7, 8, 9)
 
-Skrip ini otomatis mendeteksi distro OS, memasang Docker CE & Docker Compose V2, mengaktifkan service systemd, serta mengatur user non-root (seperti `ubuntu`, `ec2-user`, `opc`, `rocky`, dll.) agar dapat menjalankan `docker` tanpa `sudo`.
-
----
-
-### 3. Jalankan Inisialisasi & Start Container
-Masuk ke server tujuan, lalu jalankan `./setup.sh`:
+#### Langkah B: Inisialisasi & Start Container
+Setelah Docker aktif, jalankan inisialisasi Warpgate:
 
 ```bash
-cd /opt/warpgate
 chmod +x setup.sh
 
-# Mode interaktif (akan meminta input password admin baru):
+# Mode interaktif:
 ./setup.sh
 
-# Atau mode otomatis (langsung menentukan password dan domain host):
+# Atau mode non-interaktif:
 ./setup.sh --password "PasswordAdminBaru123!" --host "bastion.domain-anda.com"
 ```
 
-Skrip `setup.sh` akan secara otomatis:
-1. Menjalankan `unattended-setup` untuk membuat database SQLite baru (`data/db/db.sqlite3`), SSH Host & Client Keys baru (`data/ssh-keys/`), serta sertifikat TLS baru (`data/tls.certificate.pem` & `data/tls.key.pem`).
-2. Mengatur `trust_x_forwarded_headers: true` dan `external_host` pada `data/warpgate.yaml`.
-3. Menjalankan container Warpgate di latar belakang (`docker compose up -d`).
+---
 
-### 4. Akses Dashboard Admin
+### 🌐 Akses Dashboard Admin
 Buka browser dan akses:
 - **URL**: `https://<IP-HOST-BARU>:8889`
 - **Username**: `admin`
-- **Password**: *(sesuai dengan yang dimasukkan saat menjalankan `./setup.sh`)*
+- **Password**: *(sesuai dengan yang dimasukkan saat menjalankan skrip deploy/setup)*
 
 > [!NOTE]
 > Karena menggunakan self-signed TLS certificate bawaan saat inisialisasi, browser mungkin akan menampilkan peringatan keamanan (*Your connection is not private*). Anda dapat memilih *Advanced* -> *Proceed*.
@@ -117,3 +146,9 @@ Jika di masa mendatang Anda ingin mengosongkan kembali seluruh database, log, re
 ```bash
 ./setup.sh --reset
 ```
+
+---
+
+## 📚 Dokumentasi Lanjutan
+
+- [PANDUAN_ADMIN_WARPGATE.md](PANDUAN_ADMIN_WARPGATE.md): Panduan lengkap pengelolaan Admin UI Warpgate, penjelasan menu (Targets, Users, Roles, Tickets, SSH Keys), serta panduan konfigurasi host target Linux (SSH) dan Windows (RDP).

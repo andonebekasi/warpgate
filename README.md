@@ -14,12 +14,14 @@ This directory has been pre-cleansed (*data cleansed*) of all legacy databases, 
 
 ```text
 warpgate/
-├── docker-compose.yml       # Warpgate container service definition
-├── setup.sh                 # Automated initialization & data reset management script
-├── install-docker.sh        # Multi-OS Docker & Docker Compose installation script
+├── deploy-warpgate.sh       # All-in-one deployer (auto check & install Docker + deploy Warpgate)
+├── setup.sh                 # Warpgate initialization & data reset management script
+├── install-docker.sh        # Multi-OS Docker & Docker Compose installation script (standalone)
 ├── install-docker-al2023.sh # Dedicated Docker installer for Amazon Linux 2023
+├── docker-compose.yml       # Warpgate container service definition
 ├── README.md                # Main documentation (English)
 ├── README.id.md             # Documentation (Bahasa Indonesia)
+├── PANDUAN_ADMIN_WARPGATE.md# Complete Admin UI & Target configuration guide
 └── data/
     └── warpgate.yaml        # Base Warpgate configuration (external_host: null)
 ```
@@ -48,8 +50,43 @@ scp -r /path/to/warpgate user@new-host-ip:/opt/warpgate
 rsync -avzP /path/to/warpgate/ user@new-host-ip:/opt/warpgate/
 ```
 
-### 2. Install Docker & Docker Compose (If Not Already Installed)
-If the new host does not have Docker and Docker Compose installed, run the automated installation script:
+---
+
+### ⚡ Method 1: All-in-One Deployment (`deploy-warpgate.sh`) — *Recommended*
+
+The `deploy-warpgate.sh` script is a unified, single-step automation script that handles everything from server prerequisite validation to launching Warpgate.
+
+**What `deploy-warpgate.sh` does:**
+1. **Docker Check**: Checks whether Docker Engine and Docker Compose are installed and operational on the host.
+2. **Auto-Install Docker**: If Docker is not found, it automatically detects your OS distribution (supporting Amazon Linux 2/2023, Ubuntu, Debian, RHEL, CentOS, Rocky Linux, AlmaLinux, Oracle Linux) and installs Docker Engine & Docker Compose V2, configuring non-root user permissions (running Docker without `sudo`).
+3. **Auto-Setup & Run Warpgate**: Once Docker is confirmed ready, it initializes the SQLite database, TLS certificate, SSH keys, sets up proxy reverse header settings, and starts the Warpgate container (`docker compose up -d`).
+
+#### How to Run:
+```bash
+cd /opt/warpgate
+chmod +x deploy-warpgate.sh
+
+# Interactive mode (will prompt for a new admin password):
+./deploy-warpgate.sh
+
+# Or non-interactive mode (specify admin password and host domain directly):
+./deploy-warpgate.sh --password "YourStrongAdminPassword123!" --host "bastion.your-domain.com"
+```
+
+**Available Options / Flags:**
+- `--password <PASS>` : Initial password for the Warpgate `admin` user.
+- `--host <HOSTNAME>` : Domain or Public IP for Warpgate's `external_host`.
+- `--skip-run` : Only perform OS check & Docker installation without starting Warpgate.
+- `-h, --help` : Show help message and usage details.
+
+---
+
+### 🛠️ Method 2: Step-by-Step Deployment (Manual)
+
+If you prefer to install Docker and initialize Warpgate in separate steps:
+
+#### Step A: Install Docker & Docker Compose
+If the new host does not have Docker and Docker Compose installed, run:
 
 ```bash
 cd /opt/warpgate
@@ -65,34 +102,26 @@ chmod +x install-docker.sh
 > - **AlmaLinux** & **Rocky Linux** (8, 9)
 > - **Oracle Linux** (OL 7, 8, 9)
 
-This script automatically detects your distribution, installs Docker CE & Docker Compose V2, enables systemd services, and adds the current non-root user (e.g., `ubuntu`, `ec2-user`, `opc`, `rocky`, etc.) to the `docker` group so you can run `docker` without `sudo`.
-
----
-
-### 3. Initialize & Start Container
-Log into the destination server and execute `./setup.sh`:
+#### Step B: Initialize & Start Container
+Once Docker is running, initialize Warpgate:
 
 ```bash
-cd /opt/warpgate
 chmod +x setup.sh
 
-# Interactive mode (will prompt for a new admin password):
+# Interactive mode:
 ./setup.sh
 
-# Or non-interactive mode (specify admin password and host domain directly):
+# Or non-interactive mode:
 ./setup.sh --password "YourStrongAdminPassword123!" --host "bastion.your-domain.com"
 ```
 
-The `setup.sh` script will automatically:
-1. Run `unattended-setup` to generate a fresh SQLite database (`data/db/db.sqlite3`), new SSH Host & Client keys (`data/ssh-keys/`), and new TLS certificates (`data/tls.certificate.pem` & `data/tls.key.pem`).
-2. Set `trust_x_forwarded_headers: true` and configure `external_host` in `data/warpgate.yaml`.
-3. Launch the Warpgate container in the background (`docker compose up -d`).
+---
 
-### 4. Access Admin Dashboard
+### 🌐 Access Admin Dashboard
 Open your web browser and navigate to:
 - **URL**: `https://<NEW-HOST-IP>:8889`
 - **Username**: `admin`
-- **Password**: *(the password provided during `./setup.sh`)*
+- **Password**: *(the password provided during the deploy/setup script)*
 
 > [!NOTE]
 > Since the initial setup creates a self-signed TLS certificate, your browser may display a security warning (*Your connection is not private*). Click *Advanced* -> *Proceed* to continue.
@@ -117,3 +146,9 @@ If you ever need to reset Warpgate back to a completely clean state (erasing dat
 ```bash
 ./setup.sh --reset
 ```
+
+---
+
+## 📚 Additional Documentation
+
+- [PANDUAN_ADMIN_WARPGATE.md](PANDUAN_ADMIN_WARPGATE.md): Comprehensive Warpgate Admin UI guide, menu explanations (Targets, Users, Roles, Tickets, SSH Keys), and target configuration for Linux (SSH) and Windows (RDP).
