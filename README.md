@@ -32,7 +32,11 @@ warpgate/
 Dari komputer ini, salin folder `warpgate` ke server Linux tujuan (misalnya menggunakan `scp` atau `rsync`):
 
 ```bash
-scp -r /home/andi/script/oci/warpgate/warpgate user@ip-host-baru:/opt/warpgate
+# Menggunakan scp
+scp -r /path/to/warpgate user@ip-host-baru:/opt/warpgate
+
+# Atau menggunakan rsync
+rsync -avzP /path/to/warpgate/ user@ip-host-baru:/opt/warpgate/
 ```
 
 ### 2. Instalasi Docker & Docker Compose (Jika Belum Terpasang)
