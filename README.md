@@ -5,6 +5,8 @@
 🌐 **Select Language / Pilih Bahasa:**  
 **English** • [Bahasa Indonesia](README.id.md)
 
+👨‍💻 **Created by Andi Pangeran**
+
 ---
 </div>
 
@@ -14,6 +16,7 @@ This directory has been pre-cleansed (*data cleansed*) of all legacy databases, 
 
 ```text
 warpgate/
+├── install.sh               # One-Line installer via curl: auto check & install Docker + Warpgate
 ├── deploy-warpgate.sh       # All-in-one deployer (auto check & install Docker + deploy Warpgate)
 ├── setup.sh                 # Warpgate initialization & data reset management script
 ├── install-docker.sh        # Multi-OS Docker & Docker Compose installation script (standalone)
@@ -39,8 +42,53 @@ warpgate/
 
 ## 🚀 Deployment Guide for a New Linux Host
 
-### 1. Copy Folder to the New Host
-From your local machine or source server, transfer the `warpgate` directory to the destination Linux server (e.g., using `scp` or `rsync`):
+### ⚡ Method 0: Quick One-Line Automated Install via `curl` (Single Command on New Host) — *Fastest & Recommended*
+
+If you have a fresh Linux server/VPS (Ubuntu, Debian, AL2023, CentOS, RHEL, Rocky, AlmaLinux, Oracle Linux) with nothing installed yet, you can run the complete deployment using just a **single `curl` one-liner** without manually cloning or copying files beforehand.
+
+#### What `install.sh` Does Automatically:
+1. **`curl` Prerequisite**: Verifies that `curl` is installed on your server (installs it if missing).
+2. **Docker Engine Check & Install**:
+   - Checks if `docker` is already installed and running.
+   - If **missing**, immediately downloads and installs official Docker Engine via `curl -fsSL https://get.docker.com` (or native `dnf` on Amazon Linux 2023).
+   - Starts and enables Docker systemd daemon service (`systemctl enable --now docker`).
+   - Configures non-root user permissions (adds target user to `docker` group and sets socket ACLs on `/var/run/docker.sock`).
+3. **Docker Compose Check & Install**:
+   - Detects Docker Compose V2.
+   - If missing, automatically downloads the official Docker Compose plugin via `curl` to `/usr/local/lib/docker/cli-plugins/docker-compose`.
+4. **Warpgate Standalone CLI Binary**:
+   - Queries GitHub Releases for the latest stable Warpgate version.
+   - Downloads the pre-built Linux binary (`x86_64` or `arm64`) via `curl` to `/usr/local/bin/warpgate`. You can run `warpgate --help` directly in your host shell.
+5. **Warpgate Container Deployment**:
+   - Prepares target directory at `/opt/warpgate`.
+   - Downloads `docker-compose.yml` and base config template via `curl` from GitHub.
+   - Runs initial unattended setup to generate the SQLite database, TLS HTTPS certificates, and SSH host keys.
+   - Starts the Warpgate container in detached mode (`docker compose up -d`).
+
+#### How to Run via `curl`:
+```bash
+# Interactive Mode (secure prompt for admin password):
+curl -fsSL https://raw.githubusercontent.com/andonebekasi/warpgate/main/install.sh | bash
+
+# Non-Interactive Mode (specify admin password and public host directly):
+curl -fsSL https://raw.githubusercontent.com/andonebekasi/warpgate/main/install.sh | bash -s -- --password "YourStrongPassword123!" --host "bastion.your-domain.com"
+
+# Custom Installation Directory:
+curl -fsSL https://raw.githubusercontent.com/andonebekasi/warpgate/main/install.sh | bash -s -- --dir "/custom/path/warpgate" --password "YourStrongPassword123!"
+
+# Skip downloading the standalone CLI binary (run Docker container only):
+curl -fsSL https://raw.githubusercontent.com/andonebekasi/warpgate/main/install.sh | bash -s -- --skip-cli
+```
+
+#### How to Run Locally (If Repo is Already Cloned):
+```bash
+chmod +x install.sh
+./install.sh --password "YourStrongPassword123!"
+```
+
+---
+
+### 1. Copy Folder to the New Host (Optional for Manual Deployment)
 
 ```bash
 # Using scp
@@ -152,3 +200,9 @@ If you ever need to reset Warpgate back to a completely clean state (erasing dat
 ## 📚 Additional Documentation
 
 - [PANDUAN_ADMIN_WARPGATE.md](PANDUAN_ADMIN_WARPGATE.md): Comprehensive Warpgate Admin UI guide, menu explanations (Targets, Users, Roles, Tickets, SSH Keys), and target configuration for Linux (SSH) and Windows (RDP).
+
+---
+
+## 👤 Author
+
+Created by **Andi Pangeran**

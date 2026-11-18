@@ -5,6 +5,8 @@
 🌐 **Pilih Bahasa / Select Language:**  
 [English](README.md) • **Bahasa Indonesia**
 
+👨‍💻 **Created by Andi Pangeran**
+
 ---
 </div>
 
@@ -14,6 +16,7 @@ Folder ini telah dibersihkan (*data cleansing*) dari seluruh database lama, log 
 
 ```text
 warpgate/
+├── install.sh               # Skrip One-Line via curl: cek & instal Docker + Warpgate otomatis
 ├── deploy-warpgate.sh       # Skrip All-in-One: cek & instal Docker otomatis + deploy Warpgate
 ├── setup.sh                 # Skrip inisialisasi Warpgate & manajemen reset data
 ├── install-docker.sh        # Skrip instalasi Docker multi-OS (standalone)
@@ -39,8 +42,53 @@ warpgate/
 
 ## 🚀 Panduan Deployment di Host Linux Baru
 
-### 1. Salin Folder ke Host Baru
-Dari komputer lokal atau server lama, salin folder `warpgate` ke server Linux tujuan (misalnya menggunakan `scp` atau `rsync`):
+### ⚡ Metode 0: Quick Install Otomatis via `curl` (1 Perintah di Host Baru) — *Paling Cepat & Praktis*
+
+Jika Anda baru saja membuat VPS / Instance baru (Ubuntu, Debian, AL2023, CentOS, RHEL, Rocky, AlmaLinux, Oracle Linux) dan belum menginstal apapun, Anda dapat menjalankan instalasi lengkap hanya dengan **1 baris perintah `curl`** tanpa perlu clone atau salin folder terlebih dahulu.
+
+#### Apa yang Dilakukan Skrip `install.sh` Secara Otomatis:
+1. **Pemeriksaan `curl`**: Memastikan package `curl` tersedia di sistem.
+2. **Pemeriksaan Docker Engine**:
+   - Mengecek apakah command `docker` sudah ada.
+   - Jika **belum ada**, langsung mengunduh dan memasang Docker Engine resmi menggunakan `curl -fsSL https://get.docker.com` (atau repository native `dnf` pada Amazon Linux 2023).
+   - Mengaktifkan dan menjalankan daemon Docker di background (`systemctl enable --now docker`).
+   - Mengonfigurasi permission non-root (menambahkan user ke grup `docker` & ACL socket `/var/run/docker.sock`).
+3. **Pemeriksaan Docker Compose**:
+   - Mendeteksi ketersediaan Docker Compose V2.
+   - Jika belum ada, otomatis mengunduh binary Docker Compose resmi via `curl` ke `/usr/local/lib/docker/cli-plugins/docker-compose`.
+4. **Pemasangan Standalone CLI Warpgate**:
+   - Mendeteksi rilis versi terbaru Warpgate dari GitHub.
+   - Mengunduh binary resmi Warpgate Linux (`x86_64` atau `arm64`) via `curl` ke `/usr/local/bin/warpgate`. Anda bisa langsung menjalankan perintah `warpgate --help` di terminal host.
+5. **Deployment Container Warpgate**:
+   - Menyiapkan direktori instalasi di `/opt/warpgate`.
+   - Mengunduh `docker-compose.yml` dan template config via `curl` dari GitHub repository.
+   - Melakukan inisialisasi awal (*unattended setup*) untuk membuat database SQLite, sertifikat TLS HTTPS, dan SSH host keys baru.
+   - Menjalankan container Warpgate di background (`docker compose up -d`).
+
+#### Cara Menjalankan via `curl`:
+```bash
+# Mode Interaktif (skrip akan meminta input password admin secara aman):
+curl -fsSL https://raw.githubusercontent.com/andonebekasi/warpgate/main/install.sh | bash
+
+# Mode Non-Interaktif (langsung menyertakan password dan domain/host):
+curl -fsSL https://raw.githubusercontent.com/andonebekasi/warpgate/main/install.sh | bash -s -- --password "PasswordAdminBaru123!" --host "bastion.domain-anda.com"
+
+# Opsi kustom direktori instalasi:
+curl -fsSL https://raw.githubusercontent.com/andonebekasi/warpgate/main/install.sh | bash -s -- --dir "/custom/path/warpgate" --password "PasswordAdminBaru123!"
+
+# Melewati pengunduhan binary CLI standalone (hanya container Docker):
+curl -fsSL https://raw.githubusercontent.com/andonebekasi/warpgate/main/install.sh | bash -s -- --skip-cli
+```
+
+#### Cara Menjalankan Secara Lokal (Jika Folder Sudah Diunduh):
+```bash
+chmod +x install.sh
+./install.sh --password "PasswordAdminBaru123!"
+```
+
+---
+
+### 1. Salin Folder ke Host Baru (Opsional jika deploy manual)
 
 ```bash
 # Menggunakan scp
@@ -152,3 +200,9 @@ Jika di masa mendatang Anda ingin mengosongkan kembali seluruh database, log, re
 ## 📚 Dokumentasi Lanjutan
 
 - [PANDUAN_ADMIN_WARPGATE.md](PANDUAN_ADMIN_WARPGATE.md): Panduan lengkap pengelolaan Admin UI Warpgate, penjelasan menu (Targets, Users, Roles, Tickets, SSH Keys), serta panduan konfigurasi host target Linux (SSH) dan Windows (RDP).
+
+---
+
+## 👤 Author / Pembuat
+
+Created by **Andi Pangeran**
