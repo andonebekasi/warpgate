@@ -1,0 +1,113 @@
+================================================================================
+          KETERANGAN & PANDUAN SCRIPT INSTALASI DOCKER & DOCKER COMPOSE
+================================================================================
+Nama File Script : install-docker.sh
+Fungsi           : Instalasi otomatis Docker Engine dan Docker Compose V2
+Dukungan OS      : Amazon Linux 2/2023, Ubuntu, Debian, RHEL, AlmaLinux,
+                   Rocky Linux, Oracle Linux (x86_64 & ARM64/aarch64)
+================================================================================
+
+PERTANYAAN: APAKAH SCRIPT INI SUDAH TERMASUK DOCKER DAN DOCKER COMPOSE?
+JAWABAN   : YA, SUDAH LENGKAP 100%!
+            Script ini menginstal KEDUA komponen tersebut sekaligus dalam satu
+            kali eksekusi: Docker Engine (beserta daemon/service) dan
+            Docker Compose V2 (beserta symlink CLI-nya).
+
+================================================================================
+1. KOMPONEN-KOMPONEN YANG DIINSTAL SECARA OTOMATIS
+================================================================================
+
+A. DOCKER ENGINE & SERVICE
+   - Memasang paket Docker Engine resmi: 'docker-ce', 'docker-ce-cli', dan
+     'containerd.io' (atau paket native bawaan Amazon Linux & Oracle Linux).
+   - Mengaktifkan dan menjalankan service Docker di background secara otomatis
+     menggunakan systemd ('systemctl enable --now docker').
+   - Memastikan socket '/var/run/docker.sock' memiliki hak akses yang benar.
+
+B. DOCKER COMPOSE V2
+   - Memasang Docker Compose V2 melalui 2 metode (dengan fallback otomatis):
+     1. Metode Package Manager: Menginstal 'docker-compose-plugin' resmi dari
+        repository Docker (untuk Ubuntu, Debian, RHEL, AlmaLinux, Rocky, OL).
+     2. Metode Fallback Binary: Jika distro belum menyediakan plugin di package
+        manager (seperti Amazon Linux 2), script otomatis mengunduh binary resmi
+        Docker Compose V2 terbaru dari GitHub sesuai arsitektur CPU (x86_64 / ARM64).
+   - Membuat symlink lengkap sehingga Anda dapat memanggil dengan kedua format:
+     * Format modern  : 'docker compose' (spasi)
+     * Format legacy  : 'docker-compose' (tanda hubung)
+
+C. KONFIGURASI NON-ROOT USER (AKSES TANPA SUDO)
+   - Membuat grup sistem 'docker'.
+   - Otomatis mendaftarkan user yang sedang aktif dan user default cloud
+     (seperti 'ubuntu', 'ec2-user', 'opc', 'rocky', 'alma', 'centos', 'admin').
+   - Mengatur Access Control List (ACL) pada socket Docker menggunakan 'setfacl'
+     sehingga user langsung dapat menjalankan perintah 'docker' di terminal
+     tanpa harus logout atau login ulang.
+
+
+================================================================================
+2. DAFTAR SISTEM OPERASI YANG DIDUKUNG OTOMATIS
+================================================================================
+
+Script mendeteksi file '/etc/os-release' dan menyesuaikan metode instalasi:
+
+1. Amazon Linux:
+   - Amazon Linux 2 (menggunakan amazon-linux-extras / yum)
+   - Amazon Linux 2023 / AL3 (menggunakan dnf)
+
+2. Ubuntu Linux:
+   - Ubuntu 18.04 LTS (Bionic Beaver)
+   - Ubuntu 20.04 LTS (Focal Fossa)
+   - Ubuntu 22.04 LTS (Jammy Jellyfish)
+   - Ubuntu 24.04 LTS (Noble Numbat) hingga versi terbaru
+   (Menggunakan GPG keyring modern '/etc/apt/keyrings/docker.asc')
+
+3. Debian Linux:
+   - Debian 10 (Buster)
+   - Debian 11 (Bullseye)
+   - Debian 12 (Bookworm) dan versi terbaru
+
+4. Red Hat Enterprise Linux (RHEL):
+   - RHEL 7, 8, dan 9 (menggunakan repository Docker CE RHEL/CentOS)
+
+5. AlmaLinux & Rocky Linux:
+   - AlmaLinux 8 & 9
+   - Rocky Linux 8 & 9
+
+6. Oracle Linux (OL):
+   - Oracle Linux 7 (ol7_addons)
+   - Oracle Linux 8 & 9 (dnf / yum-utils docker-ce)
+
+
+================================================================================
+3. CARA PENGGUNAAN DI SERVER / HOST BARU
+================================================================================
+
+Cukup jalankan 2 perintah berikut di terminal server:
+
+  chmod +x install-docker.sh
+  ./install-docker.sh
+
+Atau jika ingin menentukan user non-root tertentu secara eksplisit:
+
+  ./install-docker.sh nama_user_anda
+
+
+================================================================================
+4. CARA MEMVERIFIKASI HASIL INSTALASI
+================================================================================
+
+Setelah script selesai, jalankan perintah pengujian berikut:
+
+1. Cek versi Docker Engine:
+   $ docker --version
+
+2. Cek versi Docker Compose (kedua cara harus berfungsi):
+   $ docker compose version
+   $ docker-compose --version
+
+3. Tes menjalankan container uji coba tanpa sudo:
+   $ docker run --rm hello-world
+
+Jika container hello-world berhasil berjalan dan menampilkan pesan sambutan,
+maka Docker dan Docker Compose telah 100% siap digunakan untuk Warpgate.
+================================================================================

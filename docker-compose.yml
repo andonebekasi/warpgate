@@ -1,0 +1,14 @@
+services:
+  warpgate:
+    image: ghcr.io/warp-tech/warpgate
+    container_name: warpgate
+    restart: unless-stopped
+    ports:
+      - "2222:2222"   # Port untuk koneksi SSH Bastion
+      - "8889:8888"   # Port untuk Admin UI & Web Terminal
+      - "33306:33306" # Port untuk MySQL Proxy
+      - "55432:55432" # Port untuk PostgreSQL Proxy
+    volumes:
+      - ./data:/data:Z
+    stdin_open: true
+    tty: true

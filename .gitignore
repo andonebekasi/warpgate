@@ -1,0 +1,8 @@
+# Warpgate database & secret files
+data/warpgate.sqlite*
+data/tls/
+data/ssh-keys/
+data/recordings/
+*.log
+*.tmp
+.env
