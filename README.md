@@ -25,6 +25,7 @@ warpgate/
 ├── README.md                # Main documentation (English)
 ├── README.id.md             # Documentation (Bahasa Indonesia)
 ├── PANDUAN_ADMIN_WARPGATE.md# Complete Admin UI & Target configuration guide
+├── PANDUAN_AWS_LOAD_BALANCER.md# AWS ALB & Target Group configuration guide
 └── data/
     └── warpgate.yaml        # Base Warpgate configuration (external_host: null)
 ```
@@ -200,6 +201,7 @@ If you ever need to reset Warpgate back to a completely clean state (erasing dat
 ## 📚 Additional Documentation
 
 - [PANDUAN_ADMIN_WARPGATE.md](PANDUAN_ADMIN_WARPGATE.md): Comprehensive Warpgate Admin UI guide, menu explanations (Targets, Users, Roles, Tickets, SSH Keys), and target configuration for Linux (SSH) and Windows (RDP).
+- [PANDUAN_AWS_LOAD_BALANCER.md](PANDUAN_AWS_LOAD_BALANCER.md): AWS Application Load Balancer (ALB), Target Group, HTTPS:443 SSL termination, and Health Check parameter guide.
 
 ---
 

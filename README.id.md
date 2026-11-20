@@ -25,6 +25,7 @@ warpgate/
 ├── README.md                # Dokumentasi utama (English)
 ├── README.id.md             # Panduan penggunaan (Bahasa Indonesia)
 ├── PANDUAN_ADMIN_WARPGATE.md# Panduan lengkap Admin UI & Konfigurasi Target
+├── PANDUAN_AWS_LOAD_BALANCER.md# Panduan konfigurasi AWS ALB & Target Group
 └── data/
     └── warpgate.yaml        # Konfigurasi dasar Warpgate (external_host: null)
 ```
@@ -200,6 +201,7 @@ Jika di masa mendatang Anda ingin mengosongkan kembali seluruh database, log, re
 ## 📚 Dokumentasi Lanjutan
 
 - [PANDUAN_ADMIN_WARPGATE.md](PANDUAN_ADMIN_WARPGATE.md): Panduan lengkap pengelolaan Admin UI Warpgate, penjelasan menu (Targets, Users, Roles, Tickets, SSH Keys), serta panduan konfigurasi host target Linux (SSH) dan Windows (RDP).
+- [PANDUAN_AWS_LOAD_BALANCER.md](PANDUAN_AWS_LOAD_BALANCER.md): Panduan konfigurasi AWS Application Load Balancer (ALB), Target Group, HTTPS:443 SSL termination, dan parameter Health Check.
 
 ---
 

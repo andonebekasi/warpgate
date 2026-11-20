@@ -274,12 +274,17 @@ Pengguna **tidak akan bisa mengakses target** sebelum diberikan peran (*Access R
 Setelah setup selesai, pengguna dapat terhubung melalui beberapa cara:
 
 ### A. Via Browser (Web Client)
-1. Buka browser dan arahkan ke alamat Warpgate: `https://<IP-WARPGATE>:8889`.
+1. Buka browser dan arahkan ke alamat Warpgate:
+   - **Melalui AWS ALB (Rekomendasi)**: `https://<domain-alb>` (contoh: `https://bastion.domain-anda.com` pada port standar `443`).
+   - **Melalui IP Host Langsung**: `https://<IP-WARPGATE>:8889`.
 2. Login dengan akun user (bukan akun admin, misal: user `andi`).
 3. Pengguna akan langsung melihat daftar target yang diizinkan.
 4. Klik **Connect**:
    - Untuk SSH: Membuka terminal interaktif langsung di dalam tab browser.
    - Untuk RDP: Membuka sesi GUI desktop Windows interaktif di dalam browser tanpa perlu software tambahan!
+
+> [!TIP]
+> Untuk dokumentasi lengkap konfigurasi AWS Application Load Balancer dan Target Group, lihat [PANDUAN_AWS_LOAD_BALANCER.md](PANDUAN_AWS_LOAD_BALANCER.md).
 
 ### B. Via Terminal SSH Klien
 Pengguna dapat menggunakan terminal bawaan (macOS/Linux/WSL) atau PuTTY dengan port **2222**:
